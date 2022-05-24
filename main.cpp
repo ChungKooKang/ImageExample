@@ -1,7 +1,7 @@
 #include <windows.h>
-#include "BitmapExample.h"
+#include "ImageExample.h"
 
-BitmapExample myFramework;
+ImageExample myFramework;
 
 
 int WINAPI WinMain(
