@@ -60,18 +60,45 @@ HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 
 	
 
-	for (int y = bih.biHeight -1 ; y >= 0;y--)
-	{
-		file.read(&pPixels[y * pitch], pitch);
-	}
+	//for (int y = bih.biHeight -1 ; y >= 0;y--)
+	//{
+	//	file.read(&pPixels[y * pitch], pitch);
+	//}
 
+	// RGB(30, 199, 250) 즉 바탕색이면 읽지 않기
+
+	int index{};
+	for (int y = bih.biHeight - 1; y >= 0; y--)
+	{
+		index = y * pitch;
+		for (int x = 0; x < bih.biWidth; x++)
+		{
+			char r{}, g{}, b{}, a{};
+
+			file.read(&b, 1);
+			file.read(&g, 1);
+			file.read(&r, 1);
+			file.read(&a, 1);
+
+			if (static_cast<unsigned char>(r) == 30 && static_cast<unsigned char>(g) == 199 && static_cast<unsigned char>(b) == 250)
+			{
+				r = g = b = a = 0;
+			}
+
+			pPixels[index++] = b;
+			pPixels[index++] = g;
+			pPixels[index++] = r;
+			pPixels[index++] = a;
+
+		}
+	}
 	file.close();
 
 
 	// 6. 5번 데이터로 BITMAP 만들기
 	HRESULT hr = mspRenderTarget->CreateBitmap(
 		D2D1::SizeU(bih.biWidth, bih.biHeight),
-		D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE)), // little endian 때문에 BGRA이다.
+		D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)), // little endian 때문에 BGRA이다.
 		ppBitmap
 		);
 	ThrowIfFailed(hr);
