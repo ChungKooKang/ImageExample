@@ -6,7 +6,18 @@
 
 HRESULT ImageExample::Initialize(HINSTANCE hInstance, LPCWSTR title, UINT width, UINT height)
 {
-	CoInitialize(nullptr);
+	HRESULT hr = CoInitialize(nullptr);
+	ThrowIfFailed(hr);
+
+	// WICFactory »ý¼º
+	hr = CoCreateInstance(
+		CLSID_WICImagingFactory,
+		nullptr,
+		CLSCTX_INPROC_SERVER,
+		IID_PPV_ARGS(mspWICFactory.GetAddressOf())
+	);
+	ThrowIfFailed(hr);
+
 	D2DFramework::Initialize(hInstance, title, width, height);
 
 	// LoadBMP(L"Data/32.bmp", mspBitmap.GetAddressOf());
