@@ -2,12 +2,15 @@
 #include <vector>
 #include "ImageExample.h"
 
+#pragma comment(lib, "WindowsCodecs.lib")
+
 HRESULT ImageExample::Initialize(HINSTANCE hInstance, LPCWSTR title, UINT width, UINT height)
 {
+	CoInitialize(nullptr);
 	D2DFramework::Initialize(hInstance, title, width, height);
 
-	LoadBMP(L"Data/32.bmp", mspBitmap.GetAddressOf());
-
+	// LoadBMP(L"Data/32.bmp", mspBitmap.GetAddressOf());
+	LoadWICImage(L"Data/32.bmp", mspBitmap.GetAddressOf());
 	return S_OK;
 }
 
@@ -19,6 +22,16 @@ void ImageExample::Render()
 	mspRenderTarget->DrawBitmap(mspBitmap.Get());
 
 	mspRenderTarget->EndDraw();
+}
+
+void ImageExample::Release()
+{
+	D2DFramework::Release();
+
+	mspBitmap.Reset();
+	mspWICFactory.Reset();
+
+	CoUninitialize();
 }
 
 HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
@@ -106,4 +119,9 @@ HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 	(*ppBitmap)->CopyFromMemory(nullptr, &pPixels[0], pitch);
 
 	return S_OK;
+}
+
+HRESULT ImageExample::LoadWICImage(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
+{
+	return E_NOTIMPL;
 }
