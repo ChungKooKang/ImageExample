@@ -49,12 +49,34 @@ HRESULT ImageExample::LoadBMP(LPCWSTR filename, ID2D1Bitmap** ppBitmap)
 
 	// 5. 픽셀 배열 읽기
 	std::vector<char> pPixels(bih.biSizeImage);
-	file.read(&pPixels[0], bih.biSizeImage);
+	
+	int pitch = bih.biWidth * (bih.biBitCount / 8);
+
+	// bih.biheight 음수 : 정상, 양수 : 뒤집기
+	//if (bih.biHeight < 0)
+	//{
+	//	// file.read(&pPixels[0], bih.biSizeImage);
+	//}
+
+	
+
+	for (int y = bih.biHeight -1 ; y >= 0;y--)
+	{
+		file.read(&pPixels[y * pitch], pitch);
+	}
 
 	file.close();
 
-	// 6. 5번 데이터로 BITMAP 만들기
 
+	// 6. 5번 데이터로 BITMAP 만들기
+	HRESULT hr = mspRenderTarget->CreateBitmap(
+		D2D1::SizeU(bih.biWidth, bih.biHeight),
+		D2D1::BitmapProperties(D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_IGNORE)), // little endian 때문에 BGRA이다.
+		ppBitmap
+		);
+	ThrowIfFailed(hr);
+	
+	(*ppBitmap)->CopyFromMemory(nullptr, &pPixels[0], pitch);
 
 	return S_OK;
 }
